@@ -34,6 +34,8 @@ dependencies:
   timeago: 2.0.17
   cached_network_image:
   flutter_svg:
+  googleapis_auth: ^0.2.12
+  googleapis: ^0.55.0
 
 dev_dependencies:
   flutter_test:
