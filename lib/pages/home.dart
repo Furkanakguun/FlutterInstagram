@@ -11,6 +11,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'activity_feed.dart';
 
 final GoogleSignIn googleSignIn = GoogleSignIn();
+final usersRef = Firestore.instance.collection(path);
 
 class Home extends StatefulWidget {
   @override
@@ -25,8 +26,7 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
-    pageController = PageController(
-    );
+    pageController = PageController();
     // Detects when user signed in
     googleSignIn.onCurrentUserChanged.listen((account) {
       handleSignIn(account);
@@ -43,7 +43,7 @@ class _HomeState extends State<Home> {
 
   handleSignIn(GoogleSignInAccount account) {
     if (account != null) {
-      print('User signed in!: $account');
+      createUserInFirestore();
       setState(() {
         isAuth = true;
       });
@@ -54,8 +54,18 @@ class _HomeState extends State<Home> {
     }
   }
 
+  void createUserInFirestore() async {
+    // 1) chech if user exist in users collection in database
+     //(accorduing to their id)
+      final  GoogleSignInAccount user =  googleSignIn.currentUser;
+      await usersRef
+     // 2) if the user doesn't exist , then we want to  take them to the
+          // create account 
+     // 3) get username from create account , 
+     //use it to make new user document in users collection     
+  }
   @override
-  void dispose() { 
+  void dispose() {
     pageController.dispose();
     super.dispose();
   }
@@ -68,44 +78,47 @@ class _HomeState extends State<Home> {
     googleSignIn.signOut();
   }
 
-  onPageChanged(int pageIndex){
+  onPageChanged(int pageIndex) {
     setState(() {
       this.pageIndex = pageIndex;
     });
   }
 
-  onTap(int pageIndex){
+  onTap(int pageIndex) {
     pageController.animateToPage(pageIndex,
-    duration: Duration(milliseconds: 300),
-    curve: Curves.easeInOut);
+        duration: Duration(milliseconds: 300), curve: Curves.easeInOut);
   }
 
   Scaffold buildAuthScreen() {
     return Scaffold(
       body: PageView(
         children: <Widget>[
-        Timeline(),
-        ActivityFeed(),
-        Upload(),
-        Search(),
-        Profile(),
-      ],
-      controller: pageController,
-      onPageChanged: onPageChanged,
-      physics: NeverScrollableScrollPhysics(),
+          Timeline(),
+          ActivityFeed(),
+          Upload(),
+          Search(),
+          Profile(),
+        ],
+        controller: pageController,
+        onPageChanged: onPageChanged,
+        physics: NeverScrollableScrollPhysics(),
       ),
       bottomNavigationBar: CupertinoTabBar(
         currentIndex: pageIndex,
         onTap: onTap,
         activeColor: Theme.of(context).primaryColor,
         items: [
-            BottomNavigationBarItem(icon: Icon(Icons.whatshot)),
-            BottomNavigationBarItem(icon: Icon(Icons.notifications_active)),
-            BottomNavigationBarItem(icon: Icon(Icons.photo_camera,size: 35.0,)),
-            BottomNavigationBarItem(icon: Icon(Icons.search)),
-            BottomNavigationBarItem(icon: Icon(Icons.account_circle))
+          BottomNavigationBarItem(icon: Icon(Icons.whatshot)),
+          BottomNavigationBarItem(icon: Icon(Icons.notifications_active)),
+          BottomNavigationBarItem(
+              icon: Icon(
+            Icons.photo_camera,
+            size: 35.0,
+          )),
+          BottomNavigationBarItem(icon: Icon(Icons.search)),
+          BottomNavigationBarItem(icon: Icon(Icons.account_circle))
         ],
-        ),
+      ),
     );
   }
 
